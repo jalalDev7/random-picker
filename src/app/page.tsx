@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { LuLoader2 } from "react-icons/lu";
+import { MdError, MdOpenInNew } from "react-icons/md";
 
 export default function Home() {
   const [data, setData] = useState<any[]>([]);
@@ -41,6 +44,17 @@ export default function Home() {
     setLink("");
     setVideoId("");
     setStep((old) => old - 1);
+  };
+
+  const handleLink = (url: string) => {
+    const linkReg =
+      /(?:https?:\/\/)?(?:(?:(?:www\.?)?youtube\.com(?:\/(?:(?:watch\?.*?(v=[^&\s]+).*)|(?:v(\/.*))|(channel\/.+)|(?:user\/(.+))|(?:results\?(search_query=.+))))?)|(?:youtu\.be(\/.*)?))/;
+    if (!linkReg.test(url)) {
+      setError(1);
+    } else {
+      setError(0);
+      setLink(url);
+    }
   };
 
   useEffect(() => {
@@ -219,11 +233,20 @@ export default function Home() {
           <div className="flex flex-col items-center justify-center p-16 bg-base-200 gap-4">
             {platform === "youtube" ? (
               <div className=" flex flex-col w-full gap-2 items-center justify-center">
+                {error === 1 ? (
+                  <div className="flex flex-row w-fit gap-1 items-center text-sm text-red-600 font-medium bg-red-200 px-2 py-1 border border-red-500 rounded-full">
+                    <MdError className="inline-flex size-4" />
+                    Please enter a valid youtube video link
+                  </div>
+                ) : null}
+
                 <input
                   type="text"
-                  className="w-full border border-white text-lg rounded-lg p-2"
+                  className={`w-full border ${
+                    error === 1 ? "border-red-600" : "border-white"
+                  }  text-lg rounded-lg p-2 focus:outline-0 focus:ring-0`}
                   placeholder="Paste the link here"
-                  onChange={(event) => setLink(event.currentTarget.value)}
+                  onChange={(event) => handleLink(event.currentTarget.value)}
                 />
 
                 <button
@@ -239,39 +262,72 @@ export default function Home() {
           </div>
         ) : step === 3 ? (
           <div className="flex flex-col items-center justify-center p-16 bg-base-200 gap-4">
-            <h1>Total comments: {data?.length}</h1>
-            <input
-              type="number"
-              className="w-full border border-white text-lg rounded-lg p-2"
-              placeholder="Numbers of winners, default: 1"
-              onChange={(event) =>
-                setWinnersCount(event.currentTarget.valueAsNumber)
-              }
-            />
-            <div className="flex flex-row gap-2">
-              <button
-                className="bg-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
-                onClick={() => handleStepThree()}
-              >
-                Pick a winner
-              </button>
-              <button
-                className="border border-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
-                onClick={() => setWinners([])}
-              >
-                Reset
-              </button>
-            </div>
+            {data && data.length > 0 ? (
+              <div className="flex flex-col w-full gap-4">
+                <h1 className="text-sm">
+                  <span className=" text-lg font-semibold ">
+                    Total comments:{" "}
+                  </span>
+                  {data.length} comments
+                </h1>
+                <input
+                  type="number"
+                  className="w-full border border-white text-lg rounded-lg p-2"
+                  placeholder="Numbers of winners, default: 1"
+                  onChange={(event) =>
+                    setWinnersCount(event.currentTarget.valueAsNumber)
+                  }
+                />
+                <div className="flex flex-row justify-between gap-2">
+                  <button
+                    className="border border-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
+                    onClick={() => setWinners([])}
+                  >
+                    Reset
+                  </button>
+                  <button
+                    className="bg-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
+                    onClick={() => handleStepThree()}
+                  >
+                    Pick a winner
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <LuLoader2 className="size-16 animate-spin" />
+              </div>
+            )}
 
             {winners.length >= 1 ? (
-              <div className="flex flex-col w-full gap-2">
+              <div className="flex flex-col items-start justify-start w-full gap-2">
                 {winners.map((comment, index) => (
                   <div
                     key={index}
-                    className="flex flex-col items-center justify-center gap-1 bg-zinc-600 border border-white p-2 rounded-lg"
+                    className="flex flex-col w-full  gap-1 bg-zinc-600 border border-white p-2 rounded-lg"
                   >
-                    <h2>Username: {comment.user}</h2>
-                    <h2>Comment: {comment.comment}</h2>
+                    <div className="flex flex-row justify-between w-full gap-2">
+                      <div className="flex flex-row gap-2 text-lg">
+                        <h2 className="font-semibold">Username: </h2>
+                        <Link
+                          href={`https://www.youtube.com/${comment.user}`}
+                          target="_blank"
+                        >
+                          <h2>{comment.user}</h2>
+                        </Link>
+                      </div>
+                      <Link
+                        href={`https://www.youtube.com/${comment.user}`}
+                        target="_blank"
+                      >
+                        <MdOpenInNew className="size-8 cursor-pointer text-white" />
+                      </Link>
+                    </div>
+
+                    <h2>
+                      <span className="font-semibold">Comment: </span>
+                      {comment.comment}
+                    </h2>
                   </div>
                 ))}
               </div>
