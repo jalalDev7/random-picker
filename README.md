@@ -1,7 +1,3 @@
-Certainly! Below is an example of how you could structure your README file for a Next.js and TypeScript web application that selects a random winner from social media comments. This README will include sections such as project overview, features, installation, usage, and contributing guidelines.
-
----
-
 # Random Comment Winner Picker
 
 A web application built with Next.js and TypeScript that allows users to select a random winner from the comments of social media content via a link. This tool supports various social media platforms and provides a simple interface to pick a winner fairly and randomly.
