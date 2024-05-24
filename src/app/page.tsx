@@ -5,8 +5,13 @@ import { useEffect, useState } from "react";
 import { LuLoader2 } from "react-icons/lu";
 import { MdError, MdOpenInNew } from "react-icons/md";
 
+interface resultType {
+  user: string;
+  comment: string;
+}
+
 export default function Home() {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<resultType[]>([]);
   const [step, setStep] = useState(1);
   const [platform, setPlatform] = useState<string>();
   const [link, setLink] = useState("");
@@ -25,8 +30,13 @@ export default function Home() {
       return null;
     }
     if (platform && platform === "youtube") {
-      setVideoId(link.split("=")[1]);
-      setStep(3);
+      const getId = link.split("=")[1];
+      if (getId) {
+        setVideoId(getId);
+        setStep(3);
+      } else {
+        setError(1);
+      }
     }
   };
   const handleStepThree = () => {
@@ -62,10 +72,14 @@ export default function Home() {
       const fetchData = fetch(`/api/comments/?id=${videoId}`)
         .then(async (res) => {
           const result = await res.json();
-          setData(result);
+          try {
+            setData(result);
+          } catch {
+            setError(1);
+          }
         })
         .catch((err) => {
-          console.log(err);
+          setError(1);
         });
     }
   }, [step]);
@@ -293,13 +307,18 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+            ) : error === 1 ? (
+              <div className="flex flex-row w-fit gap-1 items-center text-sm text-red-600 font-medium bg-red-200 px-2 py-1 border border-red-500 rounded-full">
+                <MdError className="inline-flex size-4" />
+                Error: Please go back and enter a valid youtube video link
+              </div>
             ) : (
               <div>
                 <LuLoader2 className="size-16 animate-spin" />
               </div>
             )}
 
-            {winners.length >= 1 ? (
+            {error === 0 && winners.length >= 1 ? (
               <div className="flex flex-col items-start justify-start w-full gap-2">
                 {winners.map((comment, index) => (
                   <div

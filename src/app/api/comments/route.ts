@@ -7,7 +7,7 @@ export async function GET(req: NextRequest, res: NextResponse) {
   const getParams = new URLSearchParams(getUrl.searchParams);
   const videoId = getParams.get("id");
 
-  if (!url || !key) throw new Error("Error setup variables");
+  if (!url || !key || !videoId) throw new Error("Error setup variables");
 
   let loopHandler: string | undefined = "start";
   let list: any = [];
