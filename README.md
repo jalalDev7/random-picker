@@ -64,10 +64,8 @@ Create a `.env.local` file in the root directory and add your social media API k
 
 ```env
 # Example:
-NEXT_PUBLIC_INSTAGRAM_API_KEY=your_instagram_api_key
-NEXT_PUBLIC_FACEBOOK_API_KEY=your_facebook_api_key
-NEXT_PUBLIC_TWITTER_API_KEY=your_twitter_api_key
-NEXT_PUBLIC_YOUTUBE_API_KEY=your_youtube_api_key
+YOUTUBE_KEY=your_google_api_key
+COMMENTS_LINK=[your_facebook_api_key](https://youtube.googleapis.com/youtube/v3/commentThreads)
 ```
 
 ### Run the Application
