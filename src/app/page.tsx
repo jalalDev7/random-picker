@@ -1,14 +1,16 @@
 "use client";
 
-import Image from "next/image";
-import { platform } from "os";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [data, setData] = useState<any[]>([]);
   const [step, setStep] = useState(1);
-  const [platform, setPlatform] = useState("");
+  const [platform, setPlatform] = useState<string>();
   const [link, setLink] = useState("");
   const [error, setError] = useState(0);
+  const [videoId, setVideoId] = useState<string>();
+  const [winnersCount, setWinnersCount] = useState(1);
+  const [winners, setWinners] = useState<any[]>([]);
 
   const handleStepOne = (platform: string) => {
     setPlatform(platform);
@@ -19,33 +21,54 @@ export default function Home() {
       setError(1);
       return null;
     }
-    if (platform && platform === "instagram") {
-      const instaLinkReg =
-        /(?:https?:\/\/)?(?:www.)?instagram.com\/?([a-zA-Z0-9\.\_\-]+)?\/([p]+)?([reel]+)?([tv]+)?([stories]+)?\/([a-zA-Z0-9\-\_\.]+)\/?([0-9]+)?/;
-      if (!instaLinkReg.test(link)) {
-        setError(2);
-        return null;
-      }
-      let getPostId = link.replace("https://", "");
-      getPostId = getPostId.replace("http://", "");
-      getPostId = getPostId.replace("www.", "");
-      const getLinkProps = getPostId.split("/");
-      console.log(getLinkProps[2]);
+    if (platform && platform === "youtube") {
+      setVideoId(link.split("=")[1]);
+      setStep(3);
     }
   };
-  const handleStepThree = () => {};
+  const handleStepThree = () => {
+    let start = 1;
+    while (start <= winnersCount) {
+      const getRandomComment = data[Math.floor(Math.random() * data.length)];
+      setWinners((old) => [...old, getRandomComment]);
+      start++;
+    }
+  };
+  const handleBack = () => {
+    setWinners([]);
+    setWinnersCount(1);
+    setData([]);
+    setLink("");
+    setVideoId("");
+    setStep((old) => old - 1);
+  };
+
+  useEffect(() => {
+    if (step === 3 && videoId) {
+      const fetchData = fetch(`/api/comments/?id=${videoId}`)
+        .then(async (res) => {
+          const result = await res.json();
+          setData(result);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [step]);
+
   return (
     <main className="flex min-h-screen min-w-screen flex-col items-center justify-center bg-slate-800 gap-8 px-4">
-      <h1 className="text-center text-3xl font-semibold">Free random picker</h1>
+      <h1 className="text-center text-3xl font-semibold">
+        Free random picker by Jalal Hi-Tech
+      </h1>
       <ul className="steps">
         <li className="step step-primary">Choose platform</li>
         <li className={`step ${step > 1 ? "step-primary" : null}`}>
-          Choose post
+          Get comments from link
         </li>
         <li className={`step ${step > 2 ? "step-primary" : null}`}>
-          Get comments
+          Pick winners
         </li>
-        <li className={`step ${step > 3 ? "step-primary" : null}`}>Start</li>
       </ul>
       <div className="mockup-window border bg-base-300 lg:w-[50%] w-full relative">
         {step === 1 ? (
@@ -192,27 +215,74 @@ export default function Home() {
               </g>
             </svg>
           </div>
-        ) : step === 2 ? (
+        ) : step === 2 && platform ? (
           <div className="flex flex-col items-center justify-center p-16 bg-base-200 gap-4">
-            <input
-              type="text"
-              className="w-full border border-white text-lg font-semibold rounded-lg p-2"
-              placeholder="Exemple : https://www.platform.com/reel/******/"
-              onChange={(event) => setLink(event.currentTarget.value)}
-            />
+            {platform === "youtube" ? (
+              <div className=" flex flex-col w-full gap-2 items-center justify-center">
+                <input
+                  type="text"
+                  className="w-full border border-white text-lg rounded-lg p-2"
+                  placeholder="Paste the link here"
+                  onChange={(event) => setLink(event.currentTarget.value)}
+                />
 
-            <button
-              className="bg-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
-              onClick={() => handleStepTwo()}
-            >
-              Fetch comments
-            </button>
+                <button
+                  className="bg-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
+                  onClick={() => handleStepTwo()}
+                >
+                  Fetch comments
+                </button>
+              </div>
+            ) : (
+              <div>Soon...</div>
+            )}
+          </div>
+        ) : step === 3 ? (
+          <div className="flex flex-col items-center justify-center p-16 bg-base-200 gap-4">
+            <h1>Total comments: {data?.length}</h1>
+            <input
+              type="number"
+              className="w-full border border-white text-lg rounded-lg p-2"
+              placeholder="Numbers of winners, default: 1"
+              onChange={(event) =>
+                setWinnersCount(event.currentTarget.valueAsNumber)
+              }
+            />
+            <div className="flex flex-row gap-2">
+              <button
+                className="bg-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
+                onClick={() => handleStepThree()}
+              >
+                Pick a winner
+              </button>
+              <button
+                className="border border-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
+                onClick={() => setWinners([])}
+              >
+                Reset
+              </button>
+            </div>
+
+            {winners.length >= 1 ? (
+              <div className="flex flex-col w-full gap-2">
+                {winners.map((comment, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center justify-center gap-1 bg-zinc-600 border border-white p-2 rounded-lg"
+                  >
+                    <h2>Username: {comment.user}</h2>
+                    <h2>Comment: {comment.comment}</h2>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : null}
+
         {step > 1 ? (
           <div
             className="absolute left-4 bottom-4 flex w-fit text-nowrap text-sm font-semibold text-blue-500 cursor-pointer"
-            onClick={() => setStep((old) => old - 1)}
+            onClick={() => handleBack()}
           >
             Back
           </div>
