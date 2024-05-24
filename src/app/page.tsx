@@ -289,7 +289,7 @@ export default function Home() {
                     className="bg-[#7480FF] text-white font-semibold px-4 py-2 w-fit rounded-lg"
                     onClick={() => handleStepThree()}
                   >
-                    Pick a winner
+                    Pick winners
                   </button>
                 </div>
               </div>
