@@ -26,7 +26,7 @@ This application helps content creators and social media managers to run giveawa
 
 ## Demo
 
-Check out a live demo of the application [here](#).
+Check out a live demo of the application random-picker-ten.vercel.app(#).
 
 ## Installation
 
