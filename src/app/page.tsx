@@ -30,7 +30,9 @@ export default function Home() {
       return null;
     }
     if (platform && platform === "youtube") {
-      const getId = link.split("=")[1];
+      const splitUrl = new URL(link);
+      const getUrlParams = new URLSearchParams(splitUrl.searchParams);
+      const getId = getUrlParams.get("v");
       if (getId) {
         setVideoId(getId);
         setStep(3);
